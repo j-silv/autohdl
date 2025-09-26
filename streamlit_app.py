@@ -58,19 +58,32 @@ def server():
         
     summary = "high_level_global_summary"
     
-    code_input("System prompt", system_prompt)
+    row1 = st.container(border=True, height=400)
+    row2 = st.container(border=True, height=400)
     
-    description_prompt = ds['description'][idx][summary]
-    
-    code_input("User prompt", description_prompt)
-    
-    code_input("Expected response", ds['code'][idx])
+    with row1:
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            code_input("System prompt", system_prompt)
+        
+        with col2:
+            description_prompt = ds['description'][idx][summary]
+            code_input("User prompt", description_prompt)   
+            
+    with row2:
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            code_input("Expected response", ds['code'][idx])
 
-    st.button("Random sample", on_click=random_sample_btn, args=[ds.num_rows])
     
-    code_input("LLM response", st.session_state['response'], edit_disabled=True)
-
-    st.button("Generate", on_click=generate_btn, args=[model, description_prompt])
+        with col2:
+            code_input("LLM response", st.session_state['response'], edit_disabled=True)
+    
+    with st.container(horizontal=True):
+        st.button("Random sample", on_click=random_sample_btn, args=[ds.num_rows])
+        st.button("Generate", on_click=generate_btn, args=[model, description_prompt])
     
 
 if __name__ == "__main__":
