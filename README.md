@@ -1,3 +1,17 @@
+---
+title: AutoHDL
+emoji: 🚀
+colorFrom: blue
+colorTo: blue
+sdk: docker
+app_port: 8501
+tags:
+- streamlit
+pinned: false
+short_description: AI agent which generates Verilog code
+license: mit
+---
+
 # AutoHDL
 
 AI agent which generates Verilog code
