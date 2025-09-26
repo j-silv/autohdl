@@ -2,3 +2,4 @@ transformers
 datasets
 outlines[transformers]
 streamlit
+streamlit_code_editor

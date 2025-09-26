@@ -2,11 +2,27 @@ import streamlit as st
 from autohdl.data import data
 from autohdl.llm import system_prompt, LLM
 import random
+from code_editor import code_editor
 
 """
 # AutoHDL
 ### AI agent which generates Verilog code
 """
+def code_input(title, message, edit_disabled=False):
+    st.text(title)
+    
+    ace_props = {"style": {"borderRadius": "0px 0px 8px 8px"}}
+    
+    code_editor(message,
+                height = 10,
+                lang="text",
+                theme="default",
+                shortcuts="vscode",
+                focus=False,
+                props=ace_props,
+                response_mode="debounce",
+                options={"wrap": True})
+    
 
 def random_sample_btn(stop):
     """Generate a new sample"""
@@ -42,28 +58,19 @@ def server():
         
     summary = "high_level_global_summary"
     
-    st.text_area("System prompt",
-                 system_prompt,
-                 height="content")
+    code_input("System prompt", system_prompt)
     
     description_prompt = ds['description'][idx][summary]
     
-    st.text_area("User prompt",
-                 description_prompt,
-                 height=200)
+    code_input("User prompt", description_prompt)
     
-    st.text_area("Expected response",
-                 ds['code'][idx],
-                 height=200)
-    
+    code_input("Expected response", ds['code'][idx])
+
     st.button("Random sample", on_click=random_sample_btn, args=[ds.num_rows])
     
-    st.text_area("LLM response",
-                 st.session_state['response'],
-                 disabled=True,
-                 height=200)
-    
-    st.button("Generate", on_click=generate_btn, args=[model, ds['description'][idx][summary]])
+    code_input("LLM response", st.session_state['response'], edit_disabled=True)
+
+    st.button("Generate", on_click=generate_btn, args=[model, description_prompt])
     
 
 if __name__ == "__main__":
