@@ -2,28 +2,19 @@ import streamlit as st
 from autohdl.data import data
 from autohdl.llm import system_prompt, LLM
 import random
-from code_editor import code_editor
 
 """
 # AutoHDL
 ### AI agent which generates Verilog code
 """
-def code_input(title, message, edit_disabled=False):
+def text_cell(title, message, edit_disabled=False, height="content"):
     st.text(title)
+    st.text_area(title,
+                 message.strip(),
+                 label_visibility="collapsed",
+                 height=height,
+                 disabled=edit_disabled)    
     
-    ace_props = {"style": {"borderRadius": "0px 0px 8px 8px"}}
-    
-    code_editor(message,
-                height = 10,
-                lang="text",
-                theme="default",
-                shortcuts="vscode",
-                focus=False,
-                props=ace_props,
-                response_mode="debounce",
-                options={"wrap": True})
-    
-
 def random_sample_btn(stop):
     """Generate a new sample"""
     
@@ -46,6 +37,7 @@ def load_model():
 def server():
     ds = data(small_dataset=True)
     
+    
     model = load_model()
     
     if 'idx' not in st.session_state:
@@ -57,29 +49,31 @@ def server():
     idx = st.session_state['idx']
         
     summary = "high_level_global_summary"
+    description_prompt = ds['description'][idx][summary]
     
-    row1 = st.container(border=True, height=400)
-    row2 = st.container(border=True, height=400)
+    CELL_HEIGHT = 300
     
-    with row1:
-        col1, col2 = st.columns(2)
+    # Prompt cells
+    with st.container(border=True, height=CELL_HEIGHT+100):
+        left, right = st.columns(2)
         
-        with col1:
-            code_input("System prompt", system_prompt)
+        with left:
+            text_cell("System prompt", system_prompt, height=CELL_HEIGHT)
         
-        with col2:
-            description_prompt = ds['description'][idx][summary]
-            code_input("User prompt", description_prompt)   
-            
-    with row2:
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            code_input("Expected response", ds['code'][idx])
-
+        with right:
+            text_cell("User prompt", description_prompt, height=CELL_HEIGHT)  
     
-        with col2:
-            code_input("LLM response", st.session_state['response'], edit_disabled=True)
+    # Response cells
+    with st.container(border=True, height=CELL_HEIGHT+100):
+        
+        left, right = st.columns(2)
+        
+        with left:
+            text_cell("Expected response", ds['code'][idx], height=CELL_HEIGHT)
+        
+        with right:
+            text_cell("LLM response", st.session_state['response'], edit_disabled=True, height=CELL_HEIGHT)
+    
     
     with st.container(horizontal=True):
         st.button("Random sample", on_click=random_sample_btn, args=[ds.num_rows])

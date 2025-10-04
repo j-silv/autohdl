@@ -32,12 +32,10 @@ class LLM:
         ]
 
         input_text=self.hf_tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-        # print(input_text)
         
-        inputs = self.hf_tokenizer.encode(input_text, return_tensors="pt").to(self.device)
+        inputs = self.hf_tokenizer(input_text, return_tensors="pt").to(self.device)
         
-        outputs = self.hf_model.generate(inputs)
+        outputs = self.hf_model.generate(**inputs, max_new_tokens=50)
         
-        # print(self.hf_tokenizer.decode(outputs[0]))
-        return self.hf_tokenizer.decode(outputs[0])
+        return self.hf_tokenizer.decode(outputs[0, inputs['input_ids'].shape[-1]:], skip_special_tokens=True)
 
