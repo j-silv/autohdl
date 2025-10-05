@@ -1,15 +1,62 @@
 import outlines
 from outlines.inputs import Chat
 from transformers import AutoModelForCausalLM, AutoTokenizer
-from .data import data
+import openai
+import tiktoken
+from dotenv import load_dotenv
 
-system_prompt = ("You only complete chats with syntax correct Verilog code. "
-                 "End the Verilog module code completion with 'endmodule'. "
-                 "Do not include module, input and output definitions.")
 
 class LLM:
+    system_prompt = ("You only complete chats with syntax correct Verilog code. "
+                    "End the Verilog module code completion with 'endmodule'. "
+                    "Do not include module, input and output definitions.")
+    
     def __init__(self):
-        self.system_prompt = system_prompt
+        load_dotenv()
+
+
+class OpenAI(LLM):
+    def __init__(self, system_prompt=None, max_context_len=1000, model="gpt-5-nano"):
+        super().__init__()
+        
+        if system_prompt:
+            self.system_prompt = system_prompt
+            
+        self.max_context_len = max_context_len
+        self.model = model
+        
+        self.messages = [{"role": "system", "content": self.system_prompt}]
+        
+        self.client = openai.OpenAI()
+        
+    def __call__(self, message):
+        self.messages.append({"role": "user", "content": message})
+        
+        response = self.client.responses.create(
+            model=self.model,
+            input=self.messages,
+            service_tier="flex"
+        )
+        
+        self.messages.append({"role": "assistant", "content": response.output_text})
+        
+        return response.output_text
+
+    def truncate(self):
+        """Truncate off tokens until we reach max_context_len
+        
+        Approach is to first determine the index where we are below the max token length
+        in the messages array. Once we find this index, then we truncate off that content until
+        we are below the max.
+        """
+        total_len = sum(len(message['content']) for message in self.messages)
+        
+        i = len(self.messages)-1
+        while total_len > self.max_context_len:
+            pass
+        
+
+class HuggingFace(LLM):
         
     def load_model(self, use_cpu=True):
         if use_cpu:

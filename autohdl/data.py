@@ -1,6 +1,19 @@
 import re
 from datasets import load_dataset
 
+
+def extract_header(prompt):
+    """Use regex to extract module header from prompt"""
+    
+    module_re = re.compile(r"module.*;")
+
+    try: 
+        result = re.search(module_re, prompt).group(0)
+    except:
+        raise Exception("Prompt is not in expected format when extracting header")
+    
+    return result.strip()
+
 def extract_description(prompt):
     """Use regex to extract description from prompt
     

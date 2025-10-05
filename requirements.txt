@@ -3,3 +3,5 @@ datasets
 outlines[transformers]
 streamlit
 streamlit_code_editor
+python-dotenv
+openai
